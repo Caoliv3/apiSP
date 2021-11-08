@@ -1,0 +1,16 @@
+{
+  "retorno": "Retorno sucesso",
+  "success": true,
+  "situacao": "Sucesso",
+  "protestos": [
+    {
+      "documento": "45543915000181",
+      "tipoDocumento": "2",
+      "valorProtestado": "952.00",
+      "idCartorioBoavista": "00997409005",
+      "quantidadeProtestos": "4"
+    }
+  ],
+  "dataConsulta": "06-04-2021",
+  "valorTotalProtestos": "952.00"
+}

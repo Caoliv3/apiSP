@@ -1,0 +1,47 @@
+{
+  "code": 200,
+  "codeMessage": "A consulta foi realizada com sucesso e retornou um resultado.",
+  "documento": "45543915000181",
+  "tipoDocumento": "2",
+  "qtdeCartorios": 2,
+  "qtdeProtestos": 3,
+  "data": [    
+	{
+      "codigo": "00996109005",
+      "atualizacaoData": "2021-03-03",
+      "quantidade": 2,
+      "protestos": [
+        {
+          "cpfCnpj": "45543915000181",
+          "dataProtesto": "2018-09-24",
+          "dataVencimento": "2018-09-11",
+          "valor": "152,00",
+          "uf_cartorio": "SP",
+          "especie": "DMI"
+        }, 
+		{
+          "cpfCnpj": "45543915000181",
+          "dataProtesto": "2018-09-24",
+          "dataVencimento": "2018-09-11",
+          "valor": "500,00",
+          "uf_cartorio": "SP",
+          "especie": "DMI"
+        },
+		{
+          "cpfCnpj": "45543915000181",
+          "dataProtesto": "2018-09-24",
+          "dataVencimento": "2018-09-11",
+          "valor": "130,00",
+          "uf_cartorio": "SP",
+          "especie": "DMI"
+        },		
+        {
+          "cpfCnpj": "45543915000181",
+          "dataProtesto": "2018-08-20",
+          "dataVencimento": "2018-08-08",
+          "valor": "170,00",
+          "uf_cartorio": "SP",
+          "especie": "DMI"
+        }]
+    }]
+}
