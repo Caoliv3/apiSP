@@ -15,4 +15,6 @@ public interface ProtestoPort {
     int getQtdadeProtestoDocumento(String documento, String tipoDocumento);
     String getDataAtualizacao(String documento);
     int getQtdadeConsultas();
+
+    String getId();
 }

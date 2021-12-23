@@ -17,39 +17,39 @@ import java.time.LocalDateTime;
 
 @Slf4j
 public class ConsultaSimplificadaSoapAdapter implements ConsultaSimplificada {
+
+
 	@Override
 	public ConsultaSimplificadaResponse consultar(ConsultaSimplificadaFiltro filtro) {
-//		log.info("consultar simples - inicio {}", LocalDateTime.now());
+		log.info("[API-SPY] Consulta simples - inicio {}", LocalDateTime.now());
 		ConsultaSimplificadaResponse respostaConsultaSimplificada = new ConsultaSimplificadaResponse();
 		ConsultaSOAP consulta;
-		String ip = null;
-		try {
-			ip = InetAddress.getLocalHost().getHostAddress();
-		} catch (UnknownHostException e) {
-			respostaConsultaSimplificada = this.fillFrom(respostaConsultaSimplificada, new
-					ErrorResponse(500, "Erro ao obter IP host.", e.getMessage(), filtro.getDocumento(), filtro.getTipoDocumento()));
-		}
 
-		if (respostaConsultaSimplificada.isSuccess()) {
-			try {
-				ServerRemessaLocator locator = new ServerRemessaLocator();
-				ServerRemessaPortType remessa = locator.getServerRemessaPort();
-				consulta = ConsultaSOAP.Xml2Object(remessa.consulta(filtro.getTipoDocumento(), filtro.getDocumento(), ip));
-				respostaConsultaSimplificada = this.fillFrom(respostaConsultaSimplificada, consulta, filtro);
-			} catch (RemoteException | ServiceException e) {
-				respostaConsultaSimplificada = this.fillFrom(respostaConsultaSimplificada, new
-						ErrorResponse(500, "Erro ao chamar serviço remoto.", e.getMessage(),filtro.getDocumento(), filtro.getTipoDocumento()));
-			} catch (JAXBException | XMLStreamException | FactoryConfigurationError e) {
-				e.printStackTrace();
-				respostaConsultaSimplificada = this.fillFrom(respostaConsultaSimplificada, new
-						ErrorResponse(500, "Erro ao converter dados recebidos.", e.getMessage(), filtro.getDocumento(), filtro.getTipoDocumento()));
-			}
+		try {
+			ServerRemessaLocator locator = new ServerRemessaLocator();
+			ServerRemessaPortType remessa = locator.getServerRemessaPort();
+
+//			log.info("[API-SPY] Chamada Instituto simples inicio: {}", LocalDateTime.now());
+			String xmlRetornoConsulta = remessa.consulta(filtro.getTipoDocumento(), filtro.getDocumento(), "127.0.0.1");
+			consulta = ConsultaSOAP.Xml2Object(xmlRetornoConsulta);
+//			log.info("[API-SPY] Chamada Instituto simples fim: {}", LocalDateTime.now());
+
+			respostaConsultaSimplificada = this.fillFrom(respostaConsultaSimplificada, consulta, filtro);
+		} catch (RemoteException | ServiceException e) {
+			respostaConsultaSimplificada = this.fillFrom(respostaConsultaSimplificada, new
+					ErrorResponse(500, "Erro ao chamar serviço remoto.", e.getMessage(),filtro.getDocumento(), filtro.getTipoDocumento()));
+		} catch (JAXBException | XMLStreamException | FactoryConfigurationError e) {
+			e.printStackTrace();
+			respostaConsultaSimplificada = this.fillFrom(respostaConsultaSimplificada, new
+					ErrorResponse(500, "Erro ao converter dados recebidos.", e.getMessage(), filtro.getDocumento(), filtro.getTipoDocumento()));
 		}
-//		log.info("consultar simples - fim {}", LocalDateTime.now());
+		log.info("[API-SPY] Consulta simples - fim {}", LocalDateTime.now());
 		return respostaConsultaSimplificada;
 	}
 
 	public ConsultaSimplificadaResponse fillFrom(ConsultaSimplificadaResponse response, ConsultaSOAP consulta, ConsultaSimplificadaFiltro filtro){
+
+//		log.info("[API-SPY] Carregando dados retornado nos objetos de domínio inicio: {}", LocalDateTime.now());
 		ConsultaSimplificadaResponse retorno = response;
 		retorno.setRetorno(consulta.retorno);
 		retorno.setDataConsulta(consulta.data_consulta);
@@ -68,11 +68,14 @@ public class ConsultaSimplificadaSoapAdapter implements ConsultaSimplificada {
 						.quantidadeProtestos(car.protestos)
 						.valorProtestado(car.valor_protestado)
 						.build());
-				log.info("Simplificada -> Doc: {} {} -C Cartorio: {} ", filtro.getTipoDocumento(), filtro.getDocumento(), car.toString());
+//				log.info("Simplificada -> Doc: {} {} -C Cartorio: {} ", filtro.getTipoDocumento(), filtro.getDocumento(), car.toString());
 			}
 		}
+//		log.info("[API-SPY] Carregando dados retornado nos objetos de domínio fim: {}", LocalDateTime.now());
 		return retorno;
 	}
+
+
 
 	public ConsultaSimplificadaResponse fillFrom(ConsultaSimplificadaResponse response, ErrorResponse error){
 		ConsultaSimplificadaResponse retorno = response;

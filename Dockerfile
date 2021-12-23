@@ -12,3 +12,7 @@ COPY target/*.jar /opt/app/app.jar
 ENTRYPOINT ["java","-jar","app.jar"]
 
 EXPOSE 8080
+
+
+
+

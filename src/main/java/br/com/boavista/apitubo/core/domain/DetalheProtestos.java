@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -26,15 +27,16 @@ public class DetalheProtestos {
 
     public void atualizarProstetos(String documento, String tipoDocumento) {
 
+//        log.info("[API-SPY] Carregamento dados base BVS vs Instituto - inicio {}", LocalDateTime.now());
         cartorioBase = getQuantidadeProtestoCartorioBase(documento, tipoDocumento);
         for (Protesto base : cartorioBase) {
             Protesto protestosBase = simplificada.stream()
                     .filter(protestosCartorio -> base.getIdCartorioBoavista().equals(protestosCartorio.getIdCartorioBoavista()))
                     .findAny()
                     .orElse(null);
-            String valorProtetosInstituto = String.format("%.2f", new BigDecimal(protestosBase.getValorProtestado()));
-            String valorProtetosBVS = String.format("%.2f", new BigDecimal(base.getValorProtestado()));
 
+            String valorProtetosInstituto = protestosBase == null ? "0" :String.format("%.2f", new BigDecimal(protestosBase.getValorProtestado()));
+            String valorProtetosBVS = String.format("%.2f", new BigDecimal(base.getValorProtestado()));
             if (protestosBase == null) {
                 baixar.add(new ResumoProtestos(base.getTipoDocumento(), base.getDocumento(), base.getIdCartorioBoavista(), base.getQuantidadeProtestos(), base.getValorProtestado()));
             } else if (!protestosBase.getQuantidadeProtestos().equals(base.getQuantidadeProtestos()) ||
@@ -52,6 +54,7 @@ public class DetalheProtestos {
                 detalhada.add(new ResumoProtestos(tipoDocumento, documento, simpli.getIdCartorioBoavista(), simpli.getQuantidadeProtestos(), simpli.getValorProtestado()));
             }
         }
+//        log.info("[API-SPY] Carregamento dados base BVS vs Instituto - fim {}", LocalDateTime.now());
     }
 
     public List<Protesto> getQuantidadeProtestoCartorioBase(String documento, String tipoDocumento ) {
@@ -94,13 +97,7 @@ public class DetalheProtestos {
 
     public String getJson(String documento, String tipoDocumento) {
 
-        List<Titulo> titulos = new ArrayList<>();
-
-        if (this.incluir.size() > 0) {
-            titulos.addAll(this.incluir);
-        }
-        getTitulosAtualizados(titulos);
-        List<RestSP> listProtestos = getParametroJson(titulos);
+        List<RestSP> listProtestos = getParametroJson(getTitulosAtualizados());
 
         RestJson json = new RestJson();
         json.setCode(200);
@@ -132,11 +129,16 @@ public class DetalheProtestos {
         if (incluir.size() > 0) {
             auditoriaJson.setIncluirProtesto(incluir);
         }
-
         return new Gson().toJson(auditoriaJson);
     }
 
-    private List<Titulo> getTitulosAtualizados(List<Titulo> titulos) {
+    private List<Titulo> getTitulosAtualizados() {
+
+        List<Titulo> titulos = new ArrayList<>();
+
+        if (this.incluir.size() > 0) {
+            titulos.addAll(this.incluir);
+        }
 
         for (Titulo base : this.recuperadaBase) {
             ResumoProtestos protestos = this.baixar.stream()

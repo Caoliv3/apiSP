@@ -35,7 +35,7 @@ public class UseCaseDetalhada {
         auditoria.setFonteConsulta(3);
         auditoria.setIdDetalhada(detalheProtestos.getId());
         auditoria.setJsonAuditoria(detalheProtestos.getJsonAuditoria());
-        auditoria.setIdAuditoria(detalheProtestos.getId());
+//        auditoria.setIdAuditoria(detalheProtestos.getId());
         auditoria.setQuantidadeConsulta(detalheProtestos.getDetalhada().size());
         ConsultaDetalhadaResponse detalhadaResponse = consultas.fazerConsultaDetalhada(detalheProtestos.getDetalhada());
         if (detalhadaResponse.isSuccess()) {

@@ -8,7 +8,7 @@ import java.sql.Timestamp;
 public class Auditoria {
 
     public int quantidadeConsulta;
-    private String idAuditoria;
+    private int idAuditoria;
     private String idSimplificada;
     private String idDetalhada;
     private String jsonSimplificada;

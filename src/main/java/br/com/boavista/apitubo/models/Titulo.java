@@ -33,7 +33,8 @@ public class Titulo implements Serializable {
 	private String erro_metodo;
 	private String erro_metodo_descricao;
 	private String data_inclusao;
-	private String idProtesto;
+//	private String idProtesto;
+
 
 }
 

@@ -35,11 +35,11 @@ public class ConsultaSoapAdapter implements ConsultaPort {
 
     @Override
     public ConsultaDetalhadaResponse fazerConsultaDetalhada(List<ResumoProtestos> protestos) {
-        log.info("consultar detalhada - inicio {}", LocalDateTime.now());
+        log.info("consultar detalhada thread - inicio {}", LocalDateTime.now());
         ExecutorService executor = Executors.newFixedThreadPool(protestos.size() > 120 ? 120 : protestos.size());
         List<Callable<List<Titulo>>> callables = new ArrayList<>();
-
-        for (ResumoProtestos protesto : protestos) {
+        List<ResumoProtestos> resumoProtestosList = protestos;
+        for (ResumoProtestos protesto : resumoProtestosList) {
             callables.add(new TituloRequest(this.consultaFactory.getConsultaDetalhada(), ConsultaDetalhadaFiltro.buildFromProtesto(protesto)));
         }
         ConsultaDetalhadaResponse response = new ConsultaDetalhadaResponse();
@@ -60,7 +60,7 @@ public class ConsultaSoapAdapter implements ConsultaPort {
             this.fillFrom(response, new ErrorResponse(500, "Erro ao executar consulta detalhada!", e.getMessage(), documento, tipoDocumento));
         }
         executor.shutdown();
-        log.info("consultar detalhada - fim {}", LocalDateTime.now());
+        log.info("consultar detalhada thread - fim {}", LocalDateTime.now());
         return response;
     }
 

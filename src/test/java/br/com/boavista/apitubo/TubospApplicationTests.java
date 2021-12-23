@@ -2,7 +2,7 @@
 //
 //import br.com.boavista.apitubo.adapters.outbound.ConsultaTestAdapter;
 //import br.com.boavista.apitubo.adapters.outbound.ConsultaTestFactory;
-//import br.com.boavista.apitubo.adapters.outbound.ProtestoRepository;
+//import br.com.boavista.apitubo.adapters.outbound.repository.ProtestoRepository;
 //import br.com.boavista.apitubo.core.domain.DetalheProtestos;
 //import br.com.boavista.apitubo.core.domain.ProtestoAtualizacao;
 //import br.com.boavista.apitubo.core.domain.ValidadorProtestoAtualizacao;

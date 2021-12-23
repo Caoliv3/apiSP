@@ -1,6 +1,7 @@
 package br.com.boavista.apitubo.core.usecases;
 
 import br.com.boavista.apitubo.core.domain.DetalheProtestos;
+import br.com.boavista.apitubo.infrastructure.ParametrosEntrada;
 import br.com.boavista.apitubo.models.Auditoria;
 import br.com.boavista.apitubo.models.ConsultaSimplificadaResponse;
 import br.com.boavista.apitubo.models.Protesto;
@@ -9,6 +10,8 @@ import br.com.boavista.apitubo.ports.outbound.ConsultaPort;
 import br.com.boavista.apitubo.ports.outbound.ProtestoPort;
 import lombok.extern.slf4j.Slf4j;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +21,8 @@ public class UseCaseSimplificada {
     private ConsultaPort consultas;
     private ProtestoPort baseProtestos;
     private DetalheProtestos detalheProtestos;
-    private Auditoria auditoria = new Auditoria();
+    private Auditoria auditoria;
+    private Timestamp timestamp;
 
     public UseCaseSimplificada(ConsultaPort consultas, ProtestoPort baseProtestos, DetalheProtestos detalheProtestos) {
         this.consultas = consultas;
@@ -27,26 +31,34 @@ public class UseCaseSimplificada {
     }
 
     //Retorna consulta simplificada
-    public String retornoConsultaSimplificada(String documento, String tipoDocumento) {
-        log.info("Consulta Simplificada - Inicio");
+    public String retornoConsultaSimplificada(ParametrosEntrada parametrosEntrada) {
+        log.info("Consulta Simplificada - Inicio {} ",  LocalDateTime.now());
         String json;
-        ConsultaSimplificadaResponse simplificadaResponse = consultas.fazerConsultaSimplificada(documento, tipoDocumento);
+        auditoria = new Auditoria();
+        ConsultaSimplificadaResponse simplificadaResponse = consultas.fazerConsultaSimplificada(parametrosEntrada.getDocumento(), parametrosEntrada.getTipoPessoa());
+        auditoria.setCodigoCliente(Integer.valueOf(parametrosEntrada.getCodigo()));
+        auditoria.setCanal(parametrosEntrada.getCanalConsulta());
+        auditoria.setProduto(parametrosEntrada.getFonte());
+        auditoria.setDocumento(parametrosEntrada.getDocumento());
+        auditoria.setTipoDocumento(Integer.valueOf(parametrosEntrada.getTipoPessoa()));
+        auditoria.setFonteConsulta(2);
+//        auditoria.setIdAuditoria(baseProtestos.getId());
+        auditoria.setInicioConsulta(parametrosEntrada.getInicioConsulta());
+        auditoria.setIdSimplificada(detalheProtestos.getId());
+
         if (simplificadaResponse.getCodigoRetono().equals("200")) {
-            json = validaSimplificada(simplificadaResponse, documento, tipoDocumento);
+            json = validaSimplificada(simplificadaResponse, parametrosEntrada.getDocumento(), parametrosEntrada.getTipoPessoa());
         } else {
             simplificadaResponse.setCodigoRetono("202");
-            auditoria.setDocumento(documento);
-            auditoria.setTipoDocumento(Integer.valueOf(tipoDocumento));
-            auditoria.setFonteConsulta(2);
             auditoria.setJsonAuditoria(detalheProtestos.getJsonAuditoria());
-            auditoria.setIdAuditoria(detalheProtestos.getId());
-            auditoria.setIdSimplificada(detalheProtestos.getId());
             auditoria.setJsonSimplificada(detalheProtestos.getJsonSimplificada(simplificadaResponse));
-            detalheProtestos.baixarProtesto(documento,tipoDocumento);
+            detalheProtestos.baixarProtesto(parametrosEntrada.getDocumento(),parametrosEntrada.getTipoPessoa());
+            timestamp = new Timestamp(System.currentTimeMillis());
+            auditoria.setFimConsulta(timestamp);
             this.baseProtestos.with(auditoria).salvar(detalheProtestos);
             json = auditoria.getJsonSimplificada();
         }
-        log.info("Consulta Simplificada - Fim");
+        log.info("Consulta Simplificada - Fim {} ",  LocalDateTime.now());
         return json;
     }
 
@@ -55,8 +67,6 @@ public class UseCaseSimplificada {
         int qtdProtestosBvs = 0;
         List<Protesto> protestoList = response.getProtestos();
         List<Protesto> lista = new ArrayList<>();
-        auditoria.setDocumento(documento);
-        auditoria.setTipoDocumento(Integer.valueOf(tipoDocumento));
         detalheProtestos.setSimplificada(protestoList);
         for (Protesto totalProtestos : protestoList) {
             qtdProtestosSimplificada += Integer.valueOf(totalProtestos.getQuantidadeProtestos());
@@ -67,7 +77,8 @@ public class UseCaseSimplificada {
         } else {
             detalheProtestos.setRecuperadaBase(this.baseProtestos.recuperarDetalheProtestos(documento));
             detalheProtestos.atualizarProstetos(documento, tipoDocumento);
-            for (ResumoProtestos resumoProtestos : detalheProtestos.getDetalhada()) {
+            List<ResumoProtestos> resumoProtestosList  = detalheProtestos.getDetalhada();
+            for (ResumoProtestos resumoProtestos : resumoProtestosList) {
                 Protesto protesto = new Protesto();
                 protesto.setTipoDocumento(resumoProtestos.getTipoDocumento());
                 protesto.setDocumento(resumoProtestos.getDocumento());
@@ -80,10 +91,9 @@ public class UseCaseSimplificada {
             response.setCodigoRetono("203");
         }
         auditoria.setJsonAuditoria(detalheProtestos.getJsonAuditoria());
-        auditoria.setFonteConsulta(2);
-        auditoria.setIdAuditoria(detalheProtestos.getId());
-        auditoria.setIdSimplificada(detalheProtestos.getId());
         auditoria.setJsonSimplificada(detalheProtestos.getJsonSimplificada(response));
+        timestamp = new Timestamp(System.currentTimeMillis());
+        auditoria.setFimConsulta(timestamp);
         this.baseProtestos.with(auditoria).salvar();
         return auditoria.getJsonSimplificada();
     }
