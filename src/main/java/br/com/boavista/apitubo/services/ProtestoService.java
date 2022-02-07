@@ -70,22 +70,24 @@ public class ProtestoService implements ProtestoRequestPort {
 
     @Override
     public String consultarCompleta(ParametrosEntrada parametrosEntrada) {
-        verificaRestricao(parametrosEntrada.getDocumento());
+        verificaRestricao(parametrosEntrada.getDocumento(), parametrosEntrada.getTipoPessoa());
         return this.useCaseCompleta.retornarProtestos(parametrosEntrada);
     }
 
-    private void verificaRestricao(String documento) {
+    private void verificaRestricao(String documento, String tipoPessoa) {
         if (repositoryListaNegra.findById(documento).isPresent()) {
             throw new ParametroEntradaException("Documento encontra-se na lista negra " + documento);
         }
-        if (repositoryCache.findById(documento).isPresent()) {
+        String cacheDocumento = tipoPessoa.equals("1") ? documento : documento.substring(0, 8);
+
+        if (repositoryCache.findById(cacheDocumento).isPresent()) {
             throw new ParametroEntradaException("Documento consultado recentemente " + documento);
         } else {
             documentoCache = new DocumentoCache();
             if (documento.length() > 11) {
-                documentoCache.setDocumento(documento.substring(0, 8));
+                documentoCache.setDocumento(cacheDocumento);
             } else {
-                documentoCache.setDocumento(documento);
+                documentoCache.setDocumento(cacheDocumento);
             }
             documentoCache.setExpira(48);
             repositoryCache.save(documentoCache);

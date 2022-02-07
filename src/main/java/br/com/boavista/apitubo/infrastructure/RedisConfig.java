@@ -43,10 +43,10 @@ public class RedisConfig {
     JedisConnectionFactory jedisConnectionFactory() {
         log.info("Parametro config Redis: Host:{} - port:{} - password:{}" , this.host, this.port, this.password);
         RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
-        redisStandaloneConfiguration.setHostName(this.host);
-        redisStandaloneConfiguration.setPort(this.port);
-        redisStandaloneConfiguration.setDatabase(this.database);
-        redisStandaloneConfiguration.setPassword(RedisPassword.of(this.password));
+        redisStandaloneConfiguration.setHostName(host);
+        redisStandaloneConfiguration.setPort(port);
+        redisStandaloneConfiguration.setDatabase(database);
+        redisStandaloneConfiguration.setPassword(RedisPassword.of(password));
 
         JedisClientConfiguration.JedisClientConfigurationBuilder jedisClientConfiguration = JedisClientConfiguration.builder();
         jedisClientConfiguration.connectTimeout(Duration.ofSeconds(60));// 60s connection timeout
